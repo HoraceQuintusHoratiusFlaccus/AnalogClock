@@ -5,12 +5,12 @@ AnalogClock::AnalogClock()
     setTitle("Analog Clock");
     resize(200, 200);
 
-    /* 1 Hour: 10, 1 Minute: 100, 1 Second: 1000 */
     TimerId = startTimer(1000);
 }
 
 void AnalogClock::timerEvent(QTimerEvent * Event)
 {
+    /* Rendering Asynchronously */
     if (Event->timerId() == TimerId)
         RenderLater();
 }
@@ -27,15 +27,18 @@ void AnalogClock::Render(QPainter * Painter)
         QPoint(-7, 8),
         QPoint(0, -70)
     };
+    static const QPoint SecondHand[3] = {
+        QPoint(7, 8),
+        QPoint(-7, 8),
+        QPoint(0, -70)
+    };
 
-    /* 191 means that it's 75% opaque */
-    QColor HourColor(127, 0, 127);
-    QColor MinuteColor(0, 127, 127, 191);
+    QColor HourColor(0, 100, 0);
+    QColor MinuteColor(153, 204, 0, 191);
+    QColor SecondColor(46, 139, 87, 163);
 
-    /* Minimize broken patterns at low resolution */
     Painter->setRenderHint(QPainter::Antialiasing);
 
-    /* Move the origin to the center of the window */
     Painter->translate(width() / 2, height() / 2);
 
     /*
@@ -52,6 +55,7 @@ void AnalogClock::Render(QPainter * Painter)
     QTime Time = QTime::currentTime();
 
     Painter->save();
+    /* 1 Hour: 30.0 degrees, 12 Hours: 360.0 degrees */
     Painter->rotate(30.0 * (Time.hour() + Time.minute() / 60.0));
     Painter->drawConvexPolygon(HourHand, 3);
     Painter->restore();
@@ -68,6 +72,7 @@ void AnalogClock::Render(QPainter * Painter)
     Painter->setBrush(MinuteColor);
 
     Painter->save();
+    /* 1 Minute: 6.0 degrees, 5 Minutes: 30.0 degrees */
     Painter->rotate(6.0 * (Time.minute() + Time.second() / 60.0));
     Painter->drawConvexPolygon(MinuteHand, 3);
     Painter->restore();
@@ -85,4 +90,14 @@ void AnalogClock::Render(QPainter * Painter)
             Painter->drawLine(92, 0, 96, 0);
        Painter->rotate(6.0);
     }
+
+    Painter->setPen(Qt::NoPen);
+    Painter->setBrush(SecondColor);
+
+    Painter->save();
+    Painter->rotate(6.0 * Time.second());
+    Painter->drawConvexPolygon(SecondHand, 3);
+    Painter->restore();
+
+    Painter->setPen(SecondColor);
 }
