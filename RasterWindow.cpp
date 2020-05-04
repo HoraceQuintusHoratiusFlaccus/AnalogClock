@@ -29,7 +29,7 @@ void RasterWindow::RenderNow()
     QPaintDevice * Device = BackingStore->paintDevice();
     QPainter Painter(Device);
 
-    Painter.fillRect(0, 0, width(), height(), QGradient::NightFade);
+    Painter.fillRect(0, 0, width(), height(), QGradient::LogicalMode);
     Render(&Painter);
     Painter.end();
 
